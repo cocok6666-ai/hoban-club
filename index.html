@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 body { margin: 0; font-size: 14px; }
@@ -68,7 +68,7 @@ body {
 h1 {
   position: relative; margin: 0; padding: 2px 10px 10px;
   display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; gap: 0 .12em;
-  font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 11vw, 56px); line-height: 1.15; letter-spacing: .01em;
+  font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 12.6vw, 62px); line-height: 1.15; letter-spacing: .01em;
 }
 .wd { display: inline-flex; }
 .ch { position: relative; display: inline-block; }
@@ -86,15 +86,25 @@ h1 {
   -webkit-background-clip: text; background-clip: text;
   animation: shine 3.6s linear infinite; animation-delay: calc(var(--i) * .14s);
 }
-.club .ch::before {
-  color: #06382a;
-  text-shadow: 0 1px 0 #0b4d39, 0 2px 0 #0a4433, 0 3px 0 #083b2c, 0 4px 0 #073426, 0 5px 0 #062d21, 0 6px 0 #05261c,
-    0 9px 10px rgba(0,0,0,.6), 0 0 26px rgba(120,255,200,.35);
-}
+.club .ch { font-family: 'Jua', 'Noto Sans KR', sans-serif; }
+.club .ch::before { content: none; }
+.club .ch:nth-child(1) { --n: #ff3d8b; --n2: #ff9ccb; --nc: #fff0f6; }
+.club .ch:nth-child(2) { --n: #22e3ff; --n2: #8cf2ff; --nc: #effdff; }
+.club .ch:nth-child(3) { --n: #ffe21f; --n2: #fff08a; --nc: #fffde6; }
+.club .ch:nth-child(4) { --n: #4dff7a; --n2: #a6ffbd; --nc: #f0fff4; }
 .club .fr {
-  background-image:
-    linear-gradient(105deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.95) 50%, rgba(255,255,255,0) 58%),
-    linear-gradient(180deg, #ffffff 0%, #d9fff0 38%, #8fe3c0 52%, #c9f7e3 70%, #ffffff 100%);
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: var(--nc); -webkit-text-fill-color: var(--nc); -webkit-text-stroke: .055em #000; paint-order: stroke fill;
+  text-shadow: 0 0 .04em #fff, 0 0 .12em var(--n2), 0 0 .24em var(--n), 0 0 .46em var(--n), 0 0 .9em var(--n);
+  animation: neonpulse 3.4s ease-in-out infinite; animation-delay: calc(var(--i) * -.37s);
+}
+@keyframes neonpulse {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  46% { opacity: 1; filter: brightness(1.12); }
+  50% { opacity: .78; filter: brightness(.9); }
+  52% { opacity: 1; filter: brightness(1.15); }
+  56% { opacity: .86; }
+  58% { opacity: 1; }
 }
 .ball {
   position: relative; flex: none; align-self: center; display: inline-grid; place-items: center;
@@ -205,7 +215,7 @@ h1 {
 }
 @keyframes flick { 0%, 17%, 22%, 61%, 65%, 100% { opacity: 1; } 19%, 63% { opacity: .5; } 20.5% { opacity: .92; } }
 @media (max-height: 760px) {
-  h1 { font-size: clamp(28px, 10.6vw, 48px); padding-bottom: 6px; }
+  h1 { font-size: clamp(28px, 11.6vw, 54px); padding-bottom: 6px; }
   .lamp { width: min(210px, 56%); }
 }
 @media (min-width: 760px) {
