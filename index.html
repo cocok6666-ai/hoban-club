@@ -19,7 +19,7 @@ body { margin: 0; font-size: 14px; }
 [hidden] { display: none !important; }
 img { max-width: 100%; }
 
-/* Layout: 폰에서는 추첨통이 화면 너비를 꽉 채우고 그 아래에 결과 당구대 두 개가 한 줄로 붙는다. 넓은 화면에서는 추첨통 왼쪽, 당구대 오른쪽. */
+/* Layout: 한 화면에 꽉 차는 구조. 위에서부터 조명, 제목, 라운드 탭, 추첨통, 같은 크기의 당구대 둘(세로), 네온. 남는 높이는 추첨통과 당구대가 나눠 쓴다. */
 :root {
   color-scheme: dark;
   --bg: #0b1511;
@@ -41,11 +41,13 @@ img { max-width: 100%; }
   --alt-lo: #0d3d2b;
   --glass-a: rgba(255,255,255,.14);
   --glass-b: rgba(120,200,165,.07);
-  --slot: clamp(40px, 13.4vw, 56px);
+  --slot: 52px;
   --font-display: 'Black Han Sans', 'Noto Sans KR', sans-serif;
   --font-body: 'Noto Sans KR', system-ui, sans-serif;
 }
+html { box-sizing: border-box; height: 100%; }
 body {
+  box-sizing: border-box; height: 100%; display: flex; flex-direction: column;
   background-color: var(--bg);
   background-image:
     radial-gradient(125% 85% at 50% 34%, rgba(0,0,0,0) 38%, rgba(0,0,0,.62) 100%),
@@ -55,17 +57,18 @@ body {
   background-repeat: no-repeat;
   color: var(--fg);
   font-family: var(--font-body);
-  padding-block: 0 20px;
+  padding-block: 0 10px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-.app { position: relative; max-width: 940px; margin: 0 auto; }
-.top { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; text-align: center; margin-bottom: 6px; }
+.app { position: relative; flex: 1 1 auto; min-height: 560px; width: 100%; max-width: 940px; margin: 0 auto; display: flex; flex-direction: column; }
+.top { flex: none; position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 6px; }
+.sub { margin: 2px 0 0; color: #fff; font: 700 clamp(12px, 3.6vw, 15px)/1.3 var(--font-body); letter-spacing: .02em; text-shadow: 0 1px 4px rgba(0,0,0,.85); }
 .ttl { min-width: 0; }
 h1 {
   position: relative; margin: 0; padding: 2px 10px 10px;
-  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 0 .3em;
-  font-family: var(--font-display); font-weight: 400; font-size: clamp(27px, 8.6vw, 44px); line-height: 1.15; letter-spacing: .01em;
+  display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; gap: 0 .12em;
+  font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 11vw, 56px); line-height: 1.15; letter-spacing: .01em;
 }
 .wd { display: inline-flex; }
 .ch { position: relative; display: inline-block; }
@@ -93,13 +96,18 @@ h1 {
     linear-gradient(105deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.95) 50%, rgba(255,255,255,0) 58%),
     linear-gradient(180deg, #ffffff 0%, #d9fff0 38%, #8fe3c0 52%, #c9f7e3 70%, #ffffff 100%);
 }
-.mv .ch { animation: jig 2.6s ease-in-out infinite; animation-delay: calc(var(--i) * -.55s); }
-@keyframes jig {
-  0%, 100% { transform: translateY(0) rotate(-2deg); }
-  25% { transform: translateY(-4px) rotate(1.5deg) scale(1.04); }
-  50% { transform: translateY(0) rotate(2deg); }
-  75% { transform: translateY(2px) rotate(-1deg); }
+.ball {
+  position: relative; flex: none; align-self: center; display: inline-grid; place-items: center;
+  width: 1.12em; height: 1.12em; border-radius: 50%; margin: 0 .04em;
+  background: radial-gradient(circle at 34% 28%, rgba(255,255,255,.75) 0 7%, rgba(255,255,255,0) 22%), radial-gradient(circle at 50% 50%, var(--bc) 0 62%, var(--bd) 100%);
+  box-shadow: inset -.06em -.08em .14em rgba(0,0,0,.45), 0 .09em .14em rgba(0,0,0,.6), 0 0 .5em var(--bg);
+  animation: roll 3.2s ease-in-out infinite;
 }
+.ball::before { content: ''; position: absolute; width: .62em; height: .62em; border-radius: 50%; background: #fbfbf4; box-shadow: inset 0 0 .06em rgba(0,0,0,.35); }
+.ball b { position: relative; font: 400 .5em/1 var(--font-display); color: #16110a; }
+.b1 { --bc: #f6c40f; --bd: #b98300; --bg: rgba(255,200,40,.5); }
+.b2 { --bc: #e0262a; --bd: #8e0f14; --bg: rgba(255,70,60,.45); animation-delay: -1.6s; }
+@keyframes roll { 0%, 100% { transform: translateY(0) rotate(-10deg); } 50% { transform: translateY(-.1em) rotate(10deg); } }
 @keyframes shine { 0% { background-position: 160% 0, 0 0; } 55%, 100% { background-position: -60% 0, 0 0; } }
 .sp {
   position: absolute; width: 15px; height: 15px; background: #fff3b8; opacity: 0; pointer-events: none;
@@ -116,36 +124,47 @@ h1 {
   box-shadow: 0 3px 0 var(--btn-lo);
 }
 .go:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-lo); }
+.bar .go { flex: 1 1 0; min-width: 0; padding: 0 10px; font-size: 16px; white-space: nowrap; }
 .go:disabled { opacity: .62; cursor: default; }
 .go:focus-visible, .link:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
 
-.stage { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
-.drum-col { width: 100%; max-width: 440px; margin-inline: auto; min-width: 0; }
-#drum { display: block; width: 100%; aspect-ratio: 340 / 380; height: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.stage { --sc: #3fb487; --sb: rgba(14,64,46,.62); --sg: rgba(120,230,185,.13);
+  position: relative; z-index: 1; flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 8px;
+  padding: 8px 10px 10px; border: 2px solid var(--sc); border-radius: 0 12px 12px 12px;
+  background-color: var(--sb);
+  background-image: linear-gradient(var(--sg) 1px, transparent 1px), linear-gradient(90deg, var(--sg) 1px, transparent 1px);
+  background-size: 26px 26px; background-position: -1px -1px;
+  box-shadow: 0 8px 22px -10px rgba(0,0,0,.7), inset 0 0 24px rgba(0,0,0,.28); }
+.stage[data-r="2"] { --sc: #5b97e6; --sb: rgba(18,46,92,.66); --sg: rgba(130,180,255,.15); }
+.drum-col { flex: 1 1 0; min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+.dslot { flex: 1 1 0; min-height: 0; display: flex; align-items: center; justify-content: center; }
+#drum { display: block; flex: none; width: min(100%, 340px); aspect-ratio: 340 / 380; height: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 #drum.pick { cursor: pointer; }
-.ctl { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
-#status { flex: 1; margin: 0; min-width: 0; text-align: left; font-size: 13px; line-height: 1.35; }
+.drum-col { position: relative; }
+#status { position: absolute; left: 0; right: 0; bottom: 2px; margin: 0; text-align: center; font-size: 13px; line-height: 1.35; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+.bar { flex: none; position: relative; z-index: 3; display: flex; align-items: flex-end; justify-content: flex-start; gap: 10px; margin: 0; }
+.bar .go { align-self: stretch; margin-bottom: 7px; }
 
-.tables { display: grid; grid-template-columns: 2fr 3fr; gap: 10px; align-content: start; width: 100%; }
-.table { min-width: 0; }
-.th { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 6px; margin-bottom: 4px; }
+.tables { flex: 0 0 52%; min-height: 200px; min-width: 0; display: grid; grid-template-rows: 1fr 1fr; gap: 8px; }
+.table { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.th { flex: none; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 6px; margin-bottom: 4px; }
 .th h2 { margin: 0; font: 400 15px/1.25 var(--font-display); }
 .tag { font-size: 12px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
 .rail {
-  position: relative; padding: 8px; border-radius: 12px;
+  flex: 1 1 0; min-height: 0; display: flex; position: relative; padding: 8px; border-radius: 12px;
   background: linear-gradient(180deg, var(--wood-hi), var(--wood) 55%, var(--wood-lo));
   box-shadow: 0 2px 0 rgba(0,0,0,.25), 0 10px 16px -12px rgba(0,0,0,.55);
   transition: box-shadow .4s;
 }
 .table.done .rail { box-shadow: 0 0 0 2px var(--brass), 0 10px 16px -12px rgba(0,0,0,.55); }
 .felt {
-  height: calc(var(--slot) + 24px); border-radius: 6px; display: grid; place-items: center;
+  flex: 1; min-height: 0; border-radius: 6px; display: grid; place-items: center;
   background: radial-gradient(120% 140% at 50% 35%, var(--felt-hi), var(--felt) 55%, var(--felt-lo));
   box-shadow: inset 0 2px 12px rgba(0,0,0,.5);
 }
 .slots { display: flex; gap: 7px; }
 .slot {
-  flex: none; width: var(--slot); height: var(--slot); border-radius: 50%;
+  flex: none; box-sizing: border-box; width: var(--slot); height: var(--slot); border-radius: 50%;
   border: 2px dashed rgba(255,255,255,.4); display: grid; place-items: center;
   color: rgba(255,255,255,.5); font: 400 18px var(--font-display);
 }
@@ -162,46 +181,49 @@ h1 {
   position: absolute; left: 0; top: 0; border-radius: 50%; background-size: 100% 100%;
   pointer-events: none; z-index: 20; will-change: transform; filter: drop-shadow(0 6px 6px rgba(0,0,0,.4));
 }
-.lamp { position: relative; z-index: 1; width: min(250px, 66%); margin: 0 auto 6px; }
+.lamp { flex: none; position: relative; z-index: 1; width: min(250px, 66%); margin: 0 auto 6px; }
 .lamp svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 6px 12px rgba(255,200,110,.5)); }
 .cone {
-  position: absolute; z-index: 0; top: 24px; left: 0; width: 100%; height: 560px; pointer-events: none;
+  position: absolute; z-index: 0; top: 24px; bottom: 0; left: 0; width: 100%; pointer-events: none;
   background: linear-gradient(180deg, rgba(255,208,130,.30), rgba(255,208,130,.10) 55%, rgba(255,208,130,0));
   clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%); filter: blur(10px); mix-blend-mode: screen;
 }
-.tabs { position: relative; z-index: 1; display: flex; gap: 4px; width: fit-content; margin: 0 auto 10px; padding: 4px; border-radius: 12px; background: linear-gradient(180deg, var(--wood-hi), var(--wood-lo)); box-shadow: 0 2px 0 rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.14); }
-.tab { min-width: 92px; padding: 9px 16px; border: 0; border-radius: 8px; background: transparent; color: #e6d6b4; font: 700 14px/1 var(--font-body); cursor: pointer; }
-.tab.on { color: #fff; background: linear-gradient(180deg, var(--felt-hi), var(--felt)); box-shadow: inset 0 2px 6px rgba(0,0,0,.35), 0 0 0 1.5px var(--brass); }
+.tabs { flex: none; position: relative; z-index: 2; display: flex; gap: 3px; width: fit-content; margin: 0 0 -2px; padding: 0; }
+.tab { --sc: #3fb487; --sb: #12402f; min-width: 88px; padding: 10px 16px 9px; border: 2px solid rgba(255,255,255,.16); border-bottom: 0; border-radius: 10px 10px 0 0; background: rgba(0,0,0,.35); color: #b9ae93; font: 700 14px/1 var(--font-body); cursor: pointer; }
+.tab[data-r="2"] { --sc: #5b97e6; --sb: #14305a; }
+.tab.on { color: #fff; background: var(--sb); border-color: var(--sc); box-shadow: 0 -3px 10px -4px var(--sc); }
 .tab:disabled { cursor: default; opacity: .6; }
 .tab.on:disabled { opacity: 1; }
 .tab:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
-.deco { grid-column: 1 / -1; display: grid; justify-items: center; gap: 14px; margin-top: 8px; pointer-events: none; }
 .neon {
-  padding: 5px 18px 5px calc(18px + .3em); border: 2px solid #ff6db8; border-radius: 999px;
-  font: 400 clamp(20px, 6.4vw, 28px)/1.1 var(--font-display); letter-spacing: .3em; color: #ffe6f3;
-  text-shadow: 0 0 3px #fff, 0 0 10px #ff4fa3, 0 0 22px #ff4fa3, 0 0 40px #ff1f86;
-  box-shadow: 0 0 8px #ff4fa3, 0 0 22px rgba(255,79,163,.55), inset 0 0 10px rgba(255,79,163,.6);
+  flex: none; align-self: center; margin-top: 8px; pointer-events: none;
+  padding: 2px 14px 2px calc(14px + .3em); border: 2px solid #ff6db8; border-radius: 999px;
+  font: 400 clamp(13px, 4vw, 18px)/1.2 var(--font-display); letter-spacing: .3em; color: #ffe6f3;
+  text-shadow: 0 0 3px #fff, 0 0 8px #ff4fa3, 0 0 18px #ff4fa3, 0 0 32px #ff1f86;
+  box-shadow: 0 0 6px #ff4fa3, 0 0 16px rgba(255,79,163,.55), inset 0 0 8px rgba(255,79,163,.6);
   animation: flick 5.5s infinite;
 }
 @keyframes flick { 0%, 17%, 22%, 61%, 65%, 100% { opacity: 1; } 19%, 63% { opacity: .5; } 20.5% { opacity: .92; } }
-.rack { display: block; width: min(100%, 380px); height: auto; filter: drop-shadow(0 6px 8px rgba(0,0,0,.5)); }
+@media (max-height: 760px) {
+  h1 { font-size: clamp(28px, 10.6vw, 48px); padding-bottom: 6px; }
+  .lamp { width: min(210px, 56%); }
+}
 @media (min-width: 760px) {
-  :root { --slot: 76px; }
-  body { padding-block: 0 28px; }
-  .top { margin-bottom: 14px; }
-  .stage { grid-template-columns: 440px minmax(0, 1fr); gap: 36px; align-items: start; }
-  .tables { grid-template-columns: 1fr; gap: 16px; max-width: 480px; }
+  body { padding-block: 0 20px; }
+  .top { margin-bottom: 10px; }
+  .stage { flex-direction: row; gap: 36px; }
+  .drum-col { flex: 0 0 440px; }
+  .tables { flex: 1 1 0; max-width: 480px; min-height: 0; }
   .th h2 { font-size: 18px; }
   .tag { font-size: 13px; }
   .rail { padding: 11px; border-radius: 14px; }
-  .felt { height: calc(var(--slot) + 40px); }
   .slots { gap: 14px; }
   .slot { font-size: 22px; }
   .pocket { width: 15px; height: 15px; }
   .p-tl { left: 3px; top: 3px; } .p-tr { right: 3px; top: 3px; } .p-bl { left: 3px; bottom: 3px; } .p-br { right: 3px; bottom: 3px; }
   .p-tm { left: calc(50% - 7px); top: 2px; } .p-bm { left: calc(50% - 7px); bottom: 2px; }
 }
-@media (prefers-reduced-motion: reduce) { .chip, .mv .ch, .fr, .sp, .neon { animation: none; } .fr { background-position: -60% 0, 0 0; } }
+@media (prefers-reduced-motion: reduce) { .chip, .fr, .sp, .neon { animation: none; } .fr { background-position: -60% 0, 0 0; } }
 </style>
 </head>
 <body>
@@ -224,26 +246,30 @@ h1 {
   </div>
   <header class="top">
     <div class="ttl">
-      <h1 aria-label="즐당즐당 호반클럽">
-        <span class="wd mv" aria-hidden="true"><span class="ch" data-c="즐" style="--i:0"><span class="fr">즐</span></span><span class="ch" data-c="당" style="--i:1"><span class="fr">당</span></span><span class="ch" data-c="즐" style="--i:2"><span class="fr">즐</span></span><span class="ch" data-c="당" style="--i:3"><span class="fr">당</span></span></span>
+      <h1 aria-label="즐 호반클럽 당">
+        <span class="ball b1" aria-hidden="true"><b>즐</b></span>
         <span class="wd club" aria-hidden="true"><span class="ch" data-c="호" style="--i:4"><span class="fr">호</span></span><span class="ch" data-c="반" style="--i:5"><span class="fr">반</span></span><span class="ch" data-c="클" style="--i:6"><span class="fr">클</span></span><span class="ch" data-c="럽" style="--i:7"><span class="fr">럽</span></span></span>
+        <span class="ball b2" aria-hidden="true"><b>당</b></span>
         <i class="sp s1"></i><i class="sp s2"></i><i class="sp s3"></i>
       </h1>
     </div>
+    <p class="sub">모두가 4구 300점이 되는 그날까지</p>
   </header>
 
+  <div class="bar">
   <nav class="tabs" id="tabs" role="tablist" aria-label="라운드">
     <button class="tab on" role="tab" aria-selected="true" data-r="1" type="button">1라운드</button>
     <button class="tab" role="tab" aria-selected="false" data-r="2" type="button" tabindex="-1">2라운드</button>
   </nav>
+  <button id="go" class="go" type="button" disabled>추첨 시작</button>
+  </div>
 
-  <main class="stage" id="stage">
+  <main class="stage" id="stage" data-r="1">
     <section class="drum-col" aria-label="추첨통">
-      <canvas id="drum" width="340" height="380" role="img" aria-label="다섯 명의 얼굴이 새겨진 공이 들어 있는 추첨통"></canvas>
-      <div class="ctl">
-        <p id="status" role="status" aria-live="polite"></p>
-        <button id="go" class="go" type="button" disabled>추첨 시작</button>
+      <div class="dslot" id="dslot">
+        <canvas id="drum" width="340" height="380" role="img" aria-label="다섯 명의 얼굴이 새겨진 공이 들어 있는 추첨통"></canvas>
       </div>
+      <p id="status" role="status" aria-live="polite"></p>
     </section>
 
     <section class="tables" aria-label="추첨 결과">
@@ -255,24 +281,6 @@ h1 {
         <div class="th"><h2>2번 테이블</h2><span class="tag">3명조</span></div>
         <div class="rail"><div class="felt"><div class="slots" data-n="3"></div></div></div>
       </article>
-      <footer class="deco" aria-hidden="true">
-        <div class="neon">BILLIARDS</div>
-        <svg class="rack" viewBox="0 0 360 92" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="bh" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient>
-          <g id="cue"><rect x="0" y="-3.2" width="46" height="6.4" rx="2.4" fill="#2b1608"/><rect x="46" y="-2.4" width="106" height="4.8" fill="#e8c88a"/><rect x="152" y="-2" width="8" height="4" fill="#f4efe0"/><rect x="160" y="-2" width="4" height="4" rx="1" fill="#3a78c8"/></g>
-        </defs>
-        <use href="#cue" transform="translate(8,82) rotate(-25)"/>
-        <use href="#cue" transform="translate(8,12) rotate(25)"/>
-        <polygon points="250,1 199,87 301,87" fill="rgba(0,0,0,.2)" stroke="#8a5a34" stroke-width="3.5" stroke-linejoin="round"/>
-        <circle cx="250" cy="17" r="10.2" fill="#f2b705"/><circle cx="250" cy="17" r="4.3" fill="#f6f4ec"/><circle cx="250" cy="17" r="10.2" fill="url(#bh)"/><circle cx="239.5" cy="35.2" r="10.2" fill="#1f55b5"/><circle cx="239.5" cy="35.2" r="4.3" fill="#f6f4ec"/><circle cx="239.5" cy="35.2" r="10.2" fill="url(#bh)"/><circle cx="260.5" cy="35.2" r="10.2" fill="#cf2e2a"/><circle cx="260.5" cy="35.2" r="4.3" fill="#f6f4ec"/><circle cx="260.5" cy="35.2" r="10.2" fill="url(#bh)"/><circle cx="229" cy="53.4" r="10.2" fill="#5d2f86"/><circle cx="229" cy="53.4" r="4.3" fill="#f6f4ec"/><circle cx="229" cy="53.4" r="10.2" fill="url(#bh)"/><circle cx="250" cy="53.4" r="10.2" fill="#ef7d17"/><circle cx="250" cy="53.4" r="4.3" fill="#f6f4ec"/><circle cx="250" cy="53.4" r="10.2" fill="url(#bh)"/><circle cx="271" cy="53.4" r="10.2" fill="#1a7a3a"/><circle cx="271" cy="53.4" r="4.3" fill="#f6f4ec"/><circle cx="271" cy="53.4" r="10.2" fill="url(#bh)"/><circle cx="218.5" cy="71.6" r="10.2" fill="#8a1c1c"/><circle cx="218.5" cy="71.6" r="4.3" fill="#f6f4ec"/><circle cx="218.5" cy="71.6" r="10.2" fill="url(#bh)"/><circle cx="239.5" cy="71.6" r="10.2" fill="#17171a"/><circle cx="239.5" cy="71.6" r="4.3" fill="#f6f4ec"/><circle cx="239.5" cy="71.6" r="10.2" fill="url(#bh)"/><circle cx="260.5" cy="71.6" r="10.2" fill="#f2b705"/><circle cx="260.5" cy="71.6" r="4.3" fill="#f6f4ec"/><circle cx="260.5" cy="71.6" r="10.2" fill="url(#bh)"/><circle cx="281.5" cy="71.6" r="10.2" fill="#1f55b5"/><circle cx="281.5" cy="71.6" r="4.3" fill="#f6f4ec"/><circle cx="281.5" cy="71.6" r="10.2" fill="url(#bh)"/>
-        <polygon points="318,64 324,57 350,57 346,64" fill="#5b97e6"/>
-        <rect x="318" y="64" width="28" height="22" rx="2" fill="#2f6bc4"/>
-        <polygon points="346,64 350,57 350,79 346,86" fill="#1f4d94"/>
-        <circle cx="332" cy="60" r="2.2" fill="#fff" fill-opacity=".7"/><circle cx="339" cy="61.5" r="1.4" fill="#fff" fill-opacity=".6"/>
-        <rect x="0" y="87" width="360" height="4" rx="2" fill="#7a4f2f"/>
-      </svg>
-      </footer>
     </section>
   </main>
 </div>
@@ -384,8 +392,24 @@ h1 {
     canvas.width = Math.round(W * k); canvas.height = Math.round(H * k);
     ctx.setTransform(k, 0, 0, k, 0, 0);
   }
-  fit();
-  try { new ResizeObserver(fit).observe(canvas); } catch (e) { window.addEventListener('resize', fit); }
+  var dslot = document.getElementById('dslot');
+  var feltEl = tables[0].querySelector('.felt');
+  function layout() {
+    var cw = dslot.clientWidth, ch = dslot.clientHeight;
+    if (cw > 0 && ch > 0) {
+      var size = Math.max(150, Math.min(cw, ch * W / H, 440));
+      canvas.style.width = Math.floor(size) + 'px'; canvas.style.height = Math.floor(size * H / W) + 'px';
+    }
+    var fh = feltEl.clientHeight, fw = feltEl.clientWidth;
+    if (fh > 0 && fw > 0) {
+      var s = Math.floor(Math.min(fh - 16, (fw - 44) / 3));
+      s = Math.max(34, Math.min(s, 120));
+      document.documentElement.style.setProperty('--slot', s + 'px');
+    }
+    fit();
+  }
+  layout();
+  try { var ro = new ResizeObserver(layout); ro.observe(dslot); ro.observe(feltEl); } catch (e) { window.addEventListener('resize', layout); }
 
   /* ---------- sound ---------- */
   var actx = null, soundOn = true;
@@ -722,7 +746,7 @@ h1 {
   }
 
   /* ---------- main run ---------- */
-  function say(t) { statusEl.textContent = t; }
+  function say(t) { /* 설명문 표시 안 함 */ }
   async function phase(prefix, label, o, ms, bp) {
     if (prefix !== null) say(prefix + ' · ' + label);
     if (bp) { burst(bp); tone(220, 70, .3, 'triangle', .12); }
@@ -799,7 +823,7 @@ h1 {
     canvas.classList.remove('pick');
   }
   function enterSheet(n) {
-    round = n; target = null; onHandoff = null; setMix({});
+    round = n; target = null; onHandoff = null; setMix({}); stage.setAttribute('data-r', String(n));
     tabBtns.forEach(function (b) {
       var on = +b.getAttribute('data-r') === n;
       b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
@@ -811,6 +835,32 @@ h1 {
       tables.forEach(function (tb) { tb.classList.add('done'); });
       goBtn.disabled = false; goBtn.textContent = '다시 뽑기'; canvas.classList.remove('pick');
     } else { placed[n] = []; idleUI(); }
+  }
+
+  /* 화면 전환 연출: 현재 화면이 밀려 나가고 새 화면이 들어옴 */
+  var switching = false;
+  function switchSheet(n) {
+    if (switching) return;
+    var dir = n > round ? 1 : -1;
+    if (RM || !stage.animate) { enterSheet(n); return; }
+    switching = true;
+    var w = Math.min(stage.clientWidth || 360, 420) * .6;
+    var opt = { duration: 230, easing: 'cubic-bezier(.5,0,.9,.4)', fill: 'forwards' };
+    tone(300, 520, .16, 'triangle', .1);
+    var out = stage.animate([
+      { transform: 'translateX(0) scale(1)', opacity: 1, filter: 'blur(0)' },
+      { transform: 'translateX(' + (-dir * w) + 'px) scale(.94)', opacity: 0, filter: 'blur(5px)' }
+    ], opt);
+    out.onfinish = function () {
+      enterSheet(n);
+      var inn = stage.animate([
+        { transform: 'translateX(' + (dir * w) + 'px) scale(.94)', opacity: 0, filter: 'blur(5px)' },
+        { transform: 'translateX(0) scale(1)', opacity: 1, filter: 'blur(0)' }
+      ], { duration: 330, easing: 'cubic-bezier(.1,.7,.2,1)' });
+      out.cancel();
+      inn.onfinish = function () { switching = false; };
+      inn.oncancel = function () { switching = false; };
+    };
   }
 
   /* ---------- 2라운드: 공을 직접 터치 ---------- */
@@ -866,9 +916,9 @@ h1 {
   });
   tabBtns.forEach(function (b) {
     b.addEventListener('click', function () {
-      if (running) return;
+      if (running || switching) return;
       var n = +b.getAttribute('data-r');
-      if (n !== round) enterSheet(n);
+      if (n !== round) switchSheet(n);
     });
   });
   goBtn.addEventListener('click', function () {
