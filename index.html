@@ -148,7 +148,7 @@ h1 {
 .stage[data-r="2"] { --sc: #5b97e6; --sb: rgba(18,46,92,.66); --sg: rgba(130,180,255,.15); }
 .drum-col { flex: 1 1 0; min-height: 0; min-width: 0; display: flex; flex-direction: column; }
 .dslot { flex: 1 1 0; min-height: 0; display: flex; align-items: center; justify-content: center; }
-#drum { display: block; flex: none; width: min(100%, 340px); aspect-ratio: 340 / 380; height: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+#drum { filter: drop-shadow(0 12px 12px rgba(0,0,0,.4)); display: block; flex: none; width: min(100%, 340px); aspect-ratio: 340 / 380; height: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 #drum.pick { cursor: pointer; }
 .drum-col { position: relative; }
 #status { position: absolute; left: 0; right: 0; bottom: 2px; margin: 0; text-align: center; font-size: 13px; line-height: 1.35; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
@@ -585,6 +585,19 @@ h1 {
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(CX, CY, RD, 0, 7); ctx.fill();
     var y0 = CY + Math.sqrt(RD * RD - GH * GH);
     ctx.fillStyle = tok.glassB; ctx.fillRect(CX - GH, y0 - 4, GH * 2, H - y0 + 4);
+    // --- 크리스탈 유리 뒷면: 가장자리 굴절(프레넬), 유리 두께, 바닥 집광 ---
+    var fr = ctx.createRadialGradient(CX, CY, RD * .68, CX, CY, RD);
+    fr.addColorStop(0, 'rgba(190,235,255,0)'); fr.addColorStop(.7, 'rgba(170,225,255,.08)'); fr.addColorStop(.93, 'rgba(210,245,255,.26)'); fr.addColorStop(1, 'rgba(240,252,255,.42)');
+    ctx.fillStyle = fr; ctx.beginPath(); ctx.arc(CX, CY, RD, 0, 7); ctx.fill();
+    ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,70,85,.28)';
+    ctx.beginPath(); ctx.arc(CX + 3, CY + 4, RD - 9, 0, 7); ctx.stroke();
+    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.3)';
+    ctx.beginPath(); ctx.arc(CX - 2, CY - 2, RD - 6, 0, 7); ctx.stroke();
+    ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, RD - 3, 0, 7); ctx.clip();
+    var cg = ctx.createRadialGradient(CX, CY + RD * .86, 2, CX, CY + RD * .86, RD * .55);
+    cg.addColorStop(0, 'rgba(225,255,250,.34)'); cg.addColorStop(1, 'rgba(225,255,250,0)');
+    ctx.fillStyle = cg; ctx.fillRect(CX - RD, CY + RD * .3, RD * 2, RD);
+    ctx.restore();
     if (shocks.length) {
       ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, RD - 2, 0, 7); ctx.clip();
       for (var i = 0; i < shocks.length; i++) {
@@ -648,11 +661,45 @@ h1 {
     }
     ctx.globalAlpha = 1;
   }
+  function drawGlassFront() {
+    var R0 = RD - 6, PI = Math.PI;
+    ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, RD - 2, 0, 7); ctx.clip();
+    // 창문 반사(왼쪽 위): 기울어진 2x2 창틀 모양
+    ctx.save(); ctx.translate(CX - RD * .42, CY - RD * .42); ctx.rotate(-.5);
+    var wg = ctx.createLinearGradient(-50, -40, 50, 40);
+    wg.addColorStop(0, 'rgba(255,255,255,.22)'); wg.addColorStop(1, 'rgba(255,255,255,.04)');
+    ctx.fillStyle = wg;
+    for (var a = 0; a < 2; a++) for (var b = 0; b < 2; b++) {
+      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-52 + a * 54, -40 + b * 42, 48, 38, 6) : ctx.rect(-52 + a * 54, -40 + b * 42, 48, 38); ctx.fill();
+    }
+    ctx.restore();
+    // 큰 초승달 반사(왼쪽 위) + 작은 반사(오른쪽 아래)
+    var cr = ctx.createLinearGradient(CX - RD, CY - RD, CX, CY);
+    cr.addColorStop(0, 'rgba(255,255,255,.72)'); cr.addColorStop(1, 'rgba(255,255,255,.08)');
+    ctx.fillStyle = cr; ctx.beginPath();
+    ctx.arc(CX, CY, R0, PI * 1.05, PI * 1.47);
+    ctx.quadraticCurveTo(CX + (R0 - 30) * Math.cos(PI * 1.26), CY + (R0 - 30) * Math.sin(PI * 1.26), CX + R0 * Math.cos(PI * 1.05), CY + R0 * Math.sin(PI * 1.05)); ctx.closePath(); ctx.fill();
+    var c2 = ctx.createLinearGradient(CX + RD, CY + RD, CX, CY);
+    c2.addColorStop(0, 'rgba(200,245,255,.42)'); c2.addColorStop(1, 'rgba(200,245,255,0)');
+    ctx.fillStyle = c2; ctx.beginPath();
+    ctx.arc(CX, CY, R0, PI * .08, PI * .32);
+    ctx.quadraticCurveTo(CX + (R0 - 18) * Math.cos(PI * .2), CY + (R0 - 18) * Math.sin(PI * .2), CX + R0 * Math.cos(PI * .08), CY + R0 * Math.sin(PI * .08)); ctx.closePath(); ctx.fill();
+    // 정반사 점광
+    var sp = ctx.createRadialGradient(CX - RD * .58, CY - RD * .66, 0, CX - RD * .58, CY - RD * .66, 16);
+    sp.addColorStop(0, 'rgba(255,255,255,.98)'); sp.addColorStop(.35, 'rgba(255,255,255,.55)'); sp.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sp; ctx.beginPath(); ctx.arc(CX - RD * .58, CY - RD * .66, 16, 0, 7); ctx.fill();
+    ctx.restore();
+    // 유리 바깥 가장자리 하이라이트
+    ctx.lineWidth = 1.6; ctx.strokeStyle = 'rgba(255,255,255,.55)';
+    ctx.beginPath(); ctx.arc(CX, CY, RD - 4, PI * .55, PI * 1.45); ctx.stroke();
+    ctx.strokeStyle = 'rgba(190,235,255,.4)';
+    ctx.beginPath(); ctx.arc(CX, CY, RD - 4, PI * 1.55, PI * 2.4); ctx.stroke();
+  }
   function drawFront() {
     var a0 = Math.asin(GH / RD), y0 = CY + Math.sqrt(RD * RD - GH * GH);
     var rg = ctx.createLinearGradient(0, CY - RD, 0, CY + RD);
     rg.addColorStop(0, tok.brass); rg.addColorStop(1, tok.brassLo);
-    ctx.strokeStyle = rg; ctx.lineCap = 'round'; ctx.lineWidth = 9;
+    ctx.strokeStyle = rg; ctx.lineCap = 'round'; ctx.lineWidth = 6;
     ctx.beginPath(); ctx.arc(CX, CY, RD + 1, Math.PI / 2 + a0, Math.PI / 2 - a0 + Math.PI * 2); ctx.stroke();
     ctx.lineWidth = 7; ctx.beginPath();
     ctx.moveTo(CX - GH, y0); ctx.lineTo(CX - GH, H); ctx.moveTo(CX + GH, y0); ctx.lineTo(CX + GH, H); ctx.stroke();
@@ -671,9 +718,7 @@ h1 {
       }
     }
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 5;
-    ctx.beginPath(); ctx.arc(CX, CY, RD - 18, Math.PI * 1.08, Math.PI * 1.38); ctx.stroke();
-    ctx.beginPath(); ctx.arc(CX, CY, RD - 18, Math.PI * 1.45, Math.PI * 1.49); ctx.stroke();
+    drawGlassFront();
     if (flash > .02) {
       var fg = ctx.createRadialGradient(CX, CY, 0, CX, CY, RD);
       fg.addColorStop(0, 'rgba(255,250,225,.95)'); fg.addColorStop(1, 'rgba(255,250,225,0)');
