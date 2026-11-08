@@ -1045,7 +1045,7 @@ h1 {
   }
   function makeSword() {
     var d = document.createElement('div'); d.className = 'sword';
-    d.innerHTML = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="78.8,24.8 75.2,21.2 44,56" fill="#e8eef3" stroke="#4d5963" stroke-width="1" stroke-linejoin="round"/><line x1="77.5" y1="22.5" x2="46" y2="54" stroke="#fff" stroke-width=".9" opacity=".9"/><line x1="71.5" y1="14.5" x2="85.5" y2="28.5" stroke="#d9a93a" stroke-width="3.6" stroke-linecap="round"/><line x1="80" y1="20" x2="91.5" y2="8.5" stroke="#5a2b14" stroke-width="4.4" stroke-linecap="round"/><circle cx="94" cy="5.5" r="3.4" fill="#d9a93a" stroke="#8a6416" stroke-width=".8"/></svg>';
+    d.innerHTML = '<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"90\" y1=\"10\" x2=\"46\" y2=\"54\" stroke=\"#6b4a2b\" stroke-width=\"3.6\" stroke-linecap=\"round\"/><line x1=\"88\" y1=\"12\" x2=\"48\" y2=\"52\" stroke=\"#d9a46a\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><polygon points=\"94,6 84,9 78,15 82,16 86,14 85,18 88,22 91,16\" fill=\"#e0392d\" stroke=\"#7a1a14\" stroke-width=\".8\" stroke-linejoin=\"round\"/><polygon points=\"86,14 76,17 70,23 74,24 78,22 77,26 80,30 83,24\" fill=\"#fff\" stroke=\"#8a8a8a\" stroke-width=\".8\" stroke-linejoin=\"round\"/><circle cx=\"92\" cy=\"8\" r=\"2.4\" fill=\"#3a2616\"/></svg>';
     return d;
   }
   function locate(slot) {
@@ -1682,7 +1682,11 @@ h1 {
       if (b.mode === 'in') {
         live.push(b);
         b.wt -= dt;
-        if (b.wt <= 0) { b.wx = R + 8 + Math.random() * (W - 2 * R - 16); b.wy = 62 + Math.random() * 178; b.wt = .3 + Math.random() * (hunt.spd > 150 ? .7 : 1.4); }
+        if (b.wt <= 0) { b.wx = R + 8 + Math.random() * (W - 2 * R - 16); b.wy = 62 + Math.random() * 178; b.wt = hunt.spd > 150 ? .18 + Math.random() * .4 : .3 + Math.random() * 1.4; }
+        if (hunt.spd > 150 && (b.dash = (b.dash || 0) - dt) <= 0) {
+          b.dash = .45 + Math.random() * .8; b.vx += (Math.random() - .5) * hunt.spd * 3; b.vy -= Math.random() * hunt.spd * 1.1;
+          spark(b.x, b.y + R * .6, 3, 140, ['#ffffff', '#e8d9a8']);
+        }
         var dx = b.wx - b.x, dy = b.wy - b.y, d = Math.hypot(dx, dy) || 1, k = Math.min(1, 5 * dt);
         b.vx += (dx / d * hunt.spd - b.vx) * k;
         b.vy += (dy / d * hunt.spd * .6 + Math.sin(tNow * 6 + b.ph * 4) * hunt.spd * .5 - b.vy) * k;
@@ -1739,7 +1743,7 @@ h1 {
   }
   function huntHit(ar, b) {
     b.mode = 'hit'; b.hT = 0; b.hitAng = ar.ang + Math.PI; b.vx = b.vy = 0;
-    hunt.state = 'idle'; flash = 1; shake = 1; hunt.spdT = 260;
+    hunt.state = 'idle'; flash = 1; shake = 1; hunt.spdT = 430;
     spark(b.x, b.y, 28, 460, ['#ff3b30', '#ffffff', '#ffd23f', COLORS[b.i]]);
     scream(); bubble(b, rnd(2) ? '으아악!' : '꺄아악!', 'scream');
     var r = hunt.res; hunt.res = null; if (r) r();
@@ -1787,7 +1791,7 @@ h1 {
     hunt.spdT = 38; hunt.calmT = 1;
     tone(560, 300, .7, 'sine', .08);
     [523, 659, 784, 1047].forEach(function (f, k) { tone(f, f * 1.01, .35, 'triangle', .12, .15 + k * .12); });
-    rest.forEach(function (b, i) { setTimeout(function () { bubble(b, '휴~ 다행이다', 'ok'); spark(b.x, b.y, 12, 220, ['#fff6a8', '#ffffff', '#ffd1e8']); }, 250 + i * 350); });
+    rest.forEach(function (b, i) { setTimeout(function () { bubble(b, ['아싸!', '어케된겨?', '에라 모르겠다'][i], 'ok'); spark(b.x, b.y, 12, 220, ['#fff6a8', '#ffffff', '#ffd1e8']); }, 250 + i * 350); });
     await wait(2300);
     for (var q = 0; q < rest.length; q++) {
       var rb = rest[q], ox = rb.x, oy = rb.y;
@@ -1807,8 +1811,8 @@ h1 {
   async function runHunt1() {
     huntStart(); resetSlots(); resetBalls();
     var order = shuffle([0, 1, 2, 3, 4]);
-    hunt.spdT = 250; tone(120, 340, .6, 'sawtooth', .04);
-    await wait(2800);
+    hunt.spdT = 400; tone(120, 340, .6, 'sawtooth', .04);
+    await wait(3800);
     for (var k = 0; k < 2; k++) {
       var b = balls[order[k]];
       await huntVolley(b, k === 0 ? 2 : 1 + rnd(2));
@@ -1828,8 +1832,8 @@ h1 {
     tone(1900, 700, .2, 'square', .08); tone(140, 55, .3, 'sine', .25); shake = .6;
     await wait(900);
     // 남은 4개 사냥 시작
-    hunt.spdT = 250; tone(120, 340, .6, 'sawtooth', .04);
-    await wait(2200);
+    hunt.spdT = 400; tone(120, 340, .6, 'sawtooth', .04);
+    await wait(3200);
     var others = balls.filter(function (b) { return b.mode === 'in'; });
     var second = others[rnd(others.length)];
     await huntVolley(second, 2);
