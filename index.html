@@ -180,6 +180,8 @@ h1 {
   color: rgba(255,255,255,.5); font: 400 18px var(--font-display);
 }
 .slot.filled { border-color: transparent; color: transparent; }
+.shp { border-radius: 0 !important; }
+.slot:has(.shp) { overflow: visible; }
 .chip {
   width: 100%; height: 100%; border-radius: 50%; background-size: 100% 100%;
   filter: drop-shadow(0 3px 4px rgba(0,0,0,.5)); animation: land .34s ease-out;
@@ -439,7 +441,7 @@ h1 {
   function rgba(h, a) { var c = hexRGB(h); return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
 
   /* ---------- ball sprites ---------- */
-  var SP = 256, sprites = [], spriteURL = [], ready = false;
+  var SP = 256, sockSprites = [], sprites = [], spriteURL = [], ready = false;
   function makeSprite(i, img) {
     var c = document.createElement('canvas'); c.width = c.height = SP;
     var g = c.getContext('2d'), r = SP / 2, base = COLORS[i];
@@ -458,12 +460,96 @@ h1 {
     g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 2; g.beginPath(); g.arc(r, r, r - 1.5, 0, 7); g.stroke();
     return c;
   }
+
+  /* ---------- bird (hunt) & sock (wash) shapes ---------- */
+  function drawWings(g, cx, cy, s, flap, base) {
+    for (var sd = -1; sd <= 1; sd += 2) {
+      g.save(); g.translate(cx + sd * s * .82, cy - s * .08); g.scale(sd, 1); g.rotate(-flap);
+      var u = s;
+      var gr = g.createLinearGradient(0, 0, u * 1.1, 0);
+      gr.addColorStop(0, '#ffffff'); gr.addColorStop(.55, mixC(base, 255, .55)); gr.addColorStop(1, base);
+      g.beginPath(); g.moveTo(0, -u * .22);
+      g.bezierCurveTo(u * .4, -u * .62, u * .95, -u * .5, u * 1.12, -u * .06);
+      g.quadraticCurveTo(u * 1.08, u * .2, u * .9, u * .2);
+      g.quadraticCurveTo(u * .92, u * .44, u * .68, u * .4);
+      g.quadraticCurveTo(u * .66, u * .62, u * .4, u * .56);
+      g.quadraticCurveTo(u * .2, u * .6, 0, u * .4); g.closePath();
+      g.fillStyle = gr; g.fill(); g.lineWidth = Math.max(1.2, u * .035); g.strokeStyle = 'rgba(20,20,20,.7)'; g.lineJoin = 'round'; g.stroke();
+      g.strokeStyle = 'rgba(0,0,0,.22)'; g.lineWidth = Math.max(1, u * .025);
+      g.beginPath(); g.moveTo(u * .15, -u * .05); g.lineTo(u * 1.0, u * .12); g.moveTo(u * .15, u * .06); g.lineTo(u * .78, u * .34); g.moveTo(u * .12, u * .14); g.lineTo(u * .5, u * .5); g.stroke();
+      g.restore();
+    }
+  }
+  function drawBirdBody(g, cx, cy, s, base) {
+    /* 꼬리 깃털 + 발 + 부리 + 머리깃 (얼굴 공 뒤/앞) */
+    g.lineJoin = 'round';
+    for (var k = -1; k <= 1; k++) {
+      g.save(); g.translate(cx, cy + s * .9); g.rotate(k * .32);
+      g.fillStyle = k ? mixC(base, 255, .3) : base; g.strokeStyle = 'rgba(20,20,20,.7)'; g.lineWidth = Math.max(1.2, s * .035);
+      g.beginPath(); g.ellipse(0, s * .22, s * .13, s * .36, 0, 0, 7); g.fill(); g.stroke(); g.restore();
+    }
+    g.strokeStyle = '#e8892a'; g.lineWidth = Math.max(2, s * .09); g.lineCap = 'round';
+    [-1, 1].forEach(function (d) {
+      g.beginPath(); g.moveTo(cx + d * s * .28, cy + s * .92); g.lineTo(cx + d * s * .3, cy + s * 1.14);
+      g.moveTo(cx + d * s * .3, cy + s * 1.14); g.lineTo(cx + d * s * .5, cy + s * 1.2); g.moveTo(cx + d * s * .3, cy + s * 1.14); g.lineTo(cx + d * s * .12, cy + s * 1.22); g.stroke();
+    });
+    for (var t = -1; t <= 1; t++) {
+      g.save(); g.translate(cx + t * s * .16, cy - s * .96); g.rotate(t * .45);
+      g.fillStyle = t ? mixC(base, 255, .2) : base; g.strokeStyle = 'rgba(20,20,20,.7)'; g.lineWidth = Math.max(1, s * .03);
+      g.beginPath(); g.ellipse(0, -s * .14, s * .08, s * .22, 0, 0, 7); g.fill(); g.stroke(); g.restore();
+    }
+  }
+  function drawBeak(g, cx, cy, s) {
+    g.beginPath(); g.moveTo(cx - s * .17, cy + s * .66); g.quadraticCurveTo(cx, cy + s * 1.18, cx + s * .17, cy + s * .66);
+    g.quadraticCurveTo(cx, cy + s * .56, cx - s * .17, cy + s * .66); g.closePath();
+    g.fillStyle = '#ffb627'; g.fill(); g.strokeStyle = 'rgba(80,40,0,.8)'; g.lineWidth = Math.max(1.2, s * .035); g.stroke();
+  }
+  function makeBird(i) {
+    var c = document.createElement('canvas'); c.width = c.height = SP;
+    var g = c.getContext('2d'), s = SP * .25, cx = SP / 2, cy = SP * .46;
+    drawBirdBody(g, cx, cy, s, COLORS[i]);
+    drawWings(g, cx, cy, s, .34, COLORS[i]);
+    g.drawImage(sprites[i], cx - s, cy - s, 2 * s, 2 * s);
+    drawBeak(g, cx, cy, s);
+    return c;
+  }
+  var SOCKP = 'M52,16 L170,16 L170,120 C170,148 188,158 210,166 C242,178 250,208 238,228 C228,244 205,246 180,246 L84,246 C44,246 28,222 34,196 C40,172 52,160 52,126 Z';
+  function makeSock(i, img) {
+    var c = document.createElement('canvas'); c.width = c.height = SP;
+    var g = c.getContext('2d'), base = COLORS[i], P = new Path2D(SOCKP);
+    g.save(); g.translate(8, 2); g.scale(.96, .96);
+    g.fillStyle = '#f7f5ef'; g.fill(P);
+    g.save(); g.clip(P);
+    g.fillStyle = base; g.fillRect(40, 16, 140, 34);                       /* 목 */
+    g.fillStyle = 'rgba(255,255,255,.4)'; for (var x = 60; x < 172; x += 14) g.fillRect(x, 16, 4, 34);
+    g.fillStyle = base; g.beginPath(); g.ellipse(236, 205, 30, 42, 0, 0, 7); g.fill();  /* 발끝 */
+    g.beginPath(); g.ellipse(52, 220, 38, 34, 0, 0, 7); g.fill();            /* 뒤꿈치 */
+    var sh = g.createLinearGradient(30, 0, 250, 0);
+    sh.addColorStop(0, 'rgba(0,0,0,.28)'); sh.addColorStop(.3, 'rgba(0,0,0,0)'); sh.addColorStop(.75, 'rgba(255,255,255,0)'); sh.addColorStop(1, 'rgba(0,0,0,.25)');
+    g.fillStyle = sh; g.fillRect(0, 0, 256, 256);
+    g.restore();
+    g.lineJoin = 'round'; g.strokeStyle = 'rgba(20,20,20,.75)'; g.lineWidth = 4; g.stroke(P);
+    g.beginPath(); g.moveTo(52, 50); g.lineTo(170, 50); g.stroke();
+    /* 얼굴 원 */
+    var fx = 118, fy = 168, fr = 60;
+    g.fillStyle = '#f6f4ec'; g.beginPath(); g.arc(fx, fy, fr + 6, 0, 7); g.fill();
+    g.strokeStyle = base; g.lineWidth = 5; g.stroke();
+    g.save(); g.beginPath(); g.arc(fx, fy, fr, 0, 7); g.clip(); g.drawImage(img, fx - fr, fy - fr, fr * 2, fr * 2); g.restore();
+    g.restore();
+    return c;
+  }
+  var birdURL = [], sockURL = [];
+  function sprURL(i) { return (game === 'hunt' && birdURL[i]) || (game === 'wash' && sockURL[i]) || spriteURL[i]; }
+  function isShape() { return game === 'hunt' || game === 'wash'; }
   var imgs = FACES.map(function (src) { var im = new Image(); im.src = src; return im; });
   Promise.all(imgs.map(function (im) {
     return im.decode ? im.decode().catch(function () {}) : new Promise(function (r) { im.onload = r; });
   })).then(function () {
     sprites = imgs.map(function (im, i) { return makeSprite(i, im); });
     spriteURL = sprites.map(function (c) { return c.toDataURL('image/png'); });
+    sockSprites = imgs.map(function (im, i) { return makeSock(i, im); });
+    sockURL = sockSprites.map(function (c) { return c.toDataURL('image/png'); });
+    birdURL = sprites.map(function (_, i) { return makeBird(i).toDataURL('image/png'); });
     ready = true;
     if (game === 'ladder') enterSheet('ladder', round); else idleUI();
   });
@@ -745,7 +831,14 @@ h1 {
       ctx.save(); ctx.translate(b.x, b.y);
       ctx.rotate(clamp(b.vx * .0012, -.4, .4));
       ctx.rotate(ang); ctx.scale(1 + st, 1 - st * .6); ctx.rotate(-ang);
-      ctx.drawImage(sprites[b.i], -R, -R, 2 * R, 2 * R);
+      if (skin === 'hunt') {
+        var bs = R * .8, fl = .1 + .6 * Math.sin(tNow * (10 + spd / 90) + b.i * 1.9);
+        drawBirdBody(ctx, 0, 0, bs, COLORS[b.i]); drawWings(ctx, 0, 0, bs, fl, COLORS[b.i]);
+        ctx.drawImage(sprites[b.i], -bs, -bs, 2 * bs, 2 * bs); drawBeak(ctx, 0, 0, bs);
+      } else if (skin === 'wash') {
+        ctx.rotate(Math.sin(tNow * 3 + b.i * 2) * .25 + b.vx * .0015);
+        ctx.drawImage(sockSprites[b.i], -R * 1.08, -R * 1.08, 2.16 * R, 2.16 * R);
+      } else ctx.drawImage(sprites[b.i], -R, -R, 2 * R, 2 * R);
       ctx.restore();
       if (skin === 'wash' && (b.bub > 0 || b.mode === 'seek' || b.mode === 'chute')) {
         var gr = b.mode === 'in' ? 1 - b.bub / b.bubMax : .4 + .1 * Math.sin(tNow * 9), br = R + 6 + gr * 9;
@@ -1039,7 +1132,7 @@ h1 {
   function fillSlot(slot, i) {
     slot.className = 'slot filled'; slot.textContent = '';
     var chip = document.createElement('div');
-    chip.className = 'chip'; chip.style.backgroundImage = 'url(' + spriteURL[i] + ')';
+    chip.className = 'chip' + (isShape() ? ' shp' : ''); chip.style.backgroundImage = 'url(' + sprURL(i) + ')';
     slot.appendChild(chip);
     if (game === 'hunt') { var lc = locate(slot); if (lc && lc[0] === 0) slot.appendChild(makeSword()); }
   }
@@ -1060,8 +1153,8 @@ h1 {
       var x1 = tr.left - sr.left + tr.width / 2, y1 = tr.top - sr.top + tr.height / 2;
       var sc = tr.width / size;
       var el = document.createElement('div');
-      el.className = 'fly'; el.style.width = el.style.height = size + 'px';
-      el.style.backgroundImage = 'url(' + spriteURL[idx] + ')';
+      el.className = 'fly' + (isShape() ? ' shp' : ''); el.style.width = el.style.height = size + 'px';
+      el.style.backgroundImage = 'url(' + sprURL(idx) + ')';
       function T(x, y, s2) { return 'translate(' + (x - size / 2) + 'px,' + (y - size / 2) + 'px) scale(' + s2 + ')'; }
       el.style.transform = T(x0, y0, 1);
       stage.appendChild(el);
