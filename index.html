@@ -173,6 +173,12 @@ h1 {
   background: radial-gradient(120% 140% at 50% 35%, var(--felt-hi), var(--felt) 55%, var(--felt-lo));
   box-shadow: inset 0 2px 12px rgba(0,0,0,.5);
 }
+.felt { position: relative; }
+.ballset { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 3px; pointer-events: none; }
+.ballset .bs { display: flex; flex-wrap: wrap; justify-content: center; width: 38px; gap: 2px; }
+.ballset .b { width: 17px; height: 17px; border-radius: 50%; box-shadow: inset -2px -3px 4px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.5); position: relative; }
+.ballset .b::after { content: ''; position: absolute; left: 3px; top: 2px; width: 6px; height: 4px; border-radius: 50%; background: rgba(255,255,255,.75); transform: rotate(-30deg); }
+.ballset .nm { font: 700 11px/1 var(--font-body); color: #ffe9a8; text-shadow: 0 1px 2px rgba(0,0,0,.7); white-space: nowrap; }
 .slots { display: flex; gap: 7px; }
 .slot {
   flex: none; box-sizing: border-box; width: var(--slot); height: var(--slot); border-radius: 50%;
@@ -347,7 +353,7 @@ h1 {
     <section class="tables" aria-label="추첨 결과">
       <article class="table" id="t0">
         <div class="th"><h2>1번 테이블</h2><span class="tag">2명조</span></div>
-        <div class="rail"><div class="felt"><div class="slots" data-n="2"></div></div></div>
+        <div class="rail"><div class="felt"><div class="slots" data-n="2"></div><div class="ballset" id="ballset" aria-hidden="true"></div></div></div>
       </article>
       <article class="table" id="t1">
         <div class="th"><h2>2번 테이블</h2><span class="tag">3명조</span></div>
@@ -1370,7 +1376,13 @@ h1 {
     canvas.classList.remove('pick');
   }
   var LABEL = { jar: '유리병', wash: '세탁기', ladder: '사다리', hunt: '사냥터', fish: '수조낚시' };
+  var BSETS = { 1: ['#f4ecd0', '#e8281f', '#e8281f', '#f58a1f'], 2: ['#f6b81c', '#f4f1e6', '#e8281f'] };
+  function setBallSet(n) {
+    var el = document.getElementById('ballset'); if (!el) return;
+    el.innerHTML = '<div class="bs">' + BSETS[n].map(function (c) { return '<i class="b" style="background:radial-gradient(circle at 35% 30%,#fff8 0,' + c + ' 45%,' + c + ' 100%)"></i>'; }).join('') + '</div><span class="nm">' + (n === 1 ? '4구 경기' : '3구 경기') + '</span>';
+  }
   function enterSheet(g, n) {
+    setBallSet(n);
     game = g; round = n; skin = g === 'wash' ? 'wash' : g === 'hunt' ? 'hunt' : g === 'fish' ? 'fish' : 'jar';
     target = null; onHandoff = null; setMix({}); doorAmt = doorTarget = 0; clearConns();
     stage.setAttribute('data-r', String(n)); wrap.setAttribute('data-r', String(n));
