@@ -1383,7 +1383,7 @@ h1 {
   function idleUI() {
     if (game === 'ladder') { ladUI(); return; }
     if (round === 1) { goBtn.textContent = '추첨 시작'; goBtn.disabled = !ready; }
-    else { goBtn.textContent = game === 'hunt' ? '공을 쏴라!' : game === 'fish' ? '복어를 터치!' : '공을 터치!'; goBtn.disabled = true; }
+    else { goBtn.textContent = '꼴찌 빼내기'; goBtn.disabled = true; }
     canvas.classList.toggle('pick', round === 2 && ready);
   }
   function finishRound() {
@@ -1598,7 +1598,7 @@ h1 {
   }
   function ladUI() {
     if (ls.fin) { goBtn.textContent = '다시 뽑기'; goBtn.disabled = ls.busy; return; }
-    if (round === 2 && !ls.pre) { goBtn.textContent = '공을 1번 테이블로!'; goBtn.disabled = true; return; }
+    if (round === 2 && !ls.pre) { goBtn.textContent = '꼴찌 빼내기'; goBtn.disabled = true; return; }
     goBtn.textContent = '다시 그리기'; goBtn.disabled = ls.busy || !ready;
   }
   function enterLadder(key) {
