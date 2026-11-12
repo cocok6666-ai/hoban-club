@@ -364,10 +364,10 @@ h1 {
   </main>
   <nav class="side" id="side" role="tablist" aria-label="뽑기 종류">
     <button class="gtab on" role="tab" aria-selected="true" data-g="hunt" type="button">사냥터</button>
+    <button class="gtab" role="tab" aria-selected="false" data-g="fish" type="button">낚시터</button>
     <button class="gtab" role="tab" aria-selected="false" data-g="wash" type="button">세탁기</button>
     <button class="gtab" role="tab" aria-selected="false" data-g="ladder" type="button">사다리</button>
     <button class="gtab" role="tab" aria-selected="false" data-g="jar" type="button">유리병</button>
-    <button class="gtab" role="tab" aria-selected="false" data-g="fish" type="button">수조낚시</button>
   </nav>
   </div>
 </div>
@@ -390,7 +390,7 @@ h1 {
   var tabBtns = [].slice.call(tabsEl.querySelectorAll('.tab'));
   var wrap = document.getElementById('wrap'), drumCol = document.getElementById('drumcol'), ladCol = document.getElementById('ladcol');
   var connSvg = document.getElementById('conn');
-  var gtabs = [].slice.call(document.querySelectorAll('.gtab')), GAMES = ['hunt', 'wash', 'ladder', 'jar', 'fish'];
+  var gtabs = [].slice.call(document.querySelectorAll('.gtab')), GAMES = ['hunt', 'fish', 'wash', 'ladder', 'jar'];
 
   /* ---------- tokens (theme aware) ---------- */
   var tok = {};
@@ -1375,7 +1375,7 @@ h1 {
     setRunning(false); goBtn.disabled = false; goBtn.textContent = '다시 뽑기';
     canvas.classList.remove('pick');
   }
-  var LABEL = { jar: '유리병', wash: '세탁기', ladder: '사다리', hunt: '사냥터', fish: '수조낚시' };
+  var LABEL = { jar: '유리병', wash: '세탁기', ladder: '사다리', hunt: '사냥터', fish: '낚시터' };
   var BSETS = { 1: ['#f4ecd0', '#e8281f', '#e8281f', '#f58a1f'], 2: ['#f6b81c', '#f4f1e6', '#e8281f'] };
   function setBallSet(n) {
     var el = document.getElementById('ballset'); if (!el) return;
