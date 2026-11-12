@@ -367,7 +367,7 @@ h1 {
     <button class="gtab" role="tab" aria-selected="false" data-g="fish" type="button">낚시터</button>
     <button class="gtab" role="tab" aria-selected="false" data-g="wash" type="button">세탁기</button>
     <button class="gtab" role="tab" aria-selected="false" data-g="ladder" type="button">사다리</button>
-    <button class="gtab" role="tab" aria-selected="false" data-g="jar" type="button">유리병</button>
+    <button class="gtab" role="tab" aria-selected="false" data-g="jar" type="button">로또</button>
   </nav>
   </div>
 </div>
@@ -467,6 +467,24 @@ h1 {
     return c;
   }
 
+  function makeLotto(i, img) {
+    var c = document.createElement('canvas'); c.width = c.height = SP;
+    var g = c.getContext('2d'), r = SP / 2, base = COLORS[i];
+    var body = g.createRadialGradient(r * .62, r * .5, r * .05, r, r, r);
+    body.addColorStop(0, mixC(base, 255, .5)); body.addColorStop(.35, mixC(base, 255, .1)); body.addColorStop(.8, base); body.addColorStop(1, mixC(base, 0, .5));
+    g.fillStyle = body; g.beginPath(); g.arc(r, r, r - 1, 0, 7); g.fill();
+    var pr = r * .72;
+    g.fillStyle = '#fbfbf6'; g.beginPath(); g.arc(r, r, pr + 3, 0, 7); g.fill();
+    g.save(); g.beginPath(); g.arc(r, r, pr, 0, 7); g.clip(); drawFaceCrop(g, img, i, r, r, pr * 2); g.restore();
+    g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1.6; g.beginPath(); g.arc(r, r, pr + 3, 0, 7); g.stroke();
+    var sh = g.createRadialGradient(r * .7, r * .6, r * .2, r, r, r);
+    sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(.7, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,.38)');
+    g.fillStyle = sh; g.beginPath(); g.arc(r, r, r - 1, 0, 7); g.fill();
+    g.save(); g.translate(r * .5, r * .34); g.rotate(-.7); g.fillStyle = 'rgba(255,255,255,.75)'; g.beginPath(); g.ellipse(0, 0, r * .3, r * .13, 0, 0, 7); g.fill(); g.restore();
+    g.fillStyle = 'rgba(255,255,255,.3)'; g.beginPath(); g.ellipse(r * 1.45, r * 1.62, r * .16, r * .07, -.7, 0, 7); g.fill();
+    g.strokeStyle = 'rgba(0,0,0,.4)'; g.lineWidth = 2; g.beginPath(); g.arc(r, r, r - 1.5, 0, 7); g.stroke();
+    return c;
+  }
   /* ---------- bird (hunt) & sock (wash) shapes ---------- */
   function drawWings(g, cx, cy, s, flap, base) {
     for (var sd = -1; sd <= 1; sd += 2) {
@@ -558,14 +576,16 @@ h1 {
     g.restore();
     return c;
   }
-  var birdURL = [], sockURL = [], fishURL = [];
-  function sprURL(i) { return (game === 'fish' && fishURL[i]) || (game === 'hunt' && birdURL[i]) || (game === 'wash' && sockURL[i]) || spriteURL[i]; }
+  var birdURL = [], sockURL = [], fishURL = [], lottoSprites = [], lottoURL = [];
+  function sprURL(i) { return (game === 'jar' && lottoURL[i]) || (game === 'fish' && fishURL[i]) || (game === 'hunt' && birdURL[i]) || (game === 'wash' && sockURL[i]) || spriteURL[i]; }
   function isShape() { return game === 'hunt' || game === 'wash' || game === 'fish'; }
   var imgs = FACES.map(function (src) { var im = new Image(); im.src = src; return im; });
   Promise.all(imgs.map(function (im) {
     return im.decode ? im.decode().catch(function () {}) : new Promise(function (r) { im.onload = r; });
   })).then(function () {
     sprites = imgs.map(function (im, i) { return makeSprite(i, im); });
+    lottoSprites = imgs.map(function (im, i) { return makeLotto(i, im); });
+    lottoURL = lottoSprites.map(function (c) { return c.toDataURL('image/png'); });
     spriteURL = sprites.map(function (c) { return c.toDataURL('image/png'); });
     faceSprites = imgs.map(function (im, i) { return makeFace(i, im); });
     sockSprites = imgs.map(function (im, i) { return makeSock(i, im); });
@@ -867,7 +887,7 @@ h1 {
       } else if (skin === 'wash') {
         ctx.rotate(Math.sin(tNow * 3 + b.i * 2) * .25 + b.vx * .0015);
         ctx.drawImage(sockSprites[b.i], -R * 1.08, -R * 1.08, 2.16 * R, 2.16 * R);
-      } else ctx.drawImage(sprites[b.i], -R, -R, 2 * R, 2 * R);
+      } else ctx.drawImage((game === 'jar' && lottoSprites[b.i]) || sprites[b.i], -R, -R, 2 * R, 2 * R);
       ctx.restore();
       if (skin === 'wash' && (b.bub > 0 || b.mode === 'seek' || b.mode === 'chute')) {
         var gr = b.mode === 'in' ? 1 - b.bub / b.bubMax : .4 + .1 * Math.sin(tNow * 9), br = R + 6 + gr * 9;
@@ -1375,7 +1395,7 @@ h1 {
     setRunning(false); goBtn.disabled = false; goBtn.textContent = '다시 뽑기';
     canvas.classList.remove('pick');
   }
-  var LABEL = { jar: '유리병', wash: '세탁기', ladder: '사다리', hunt: '사냥터', fish: '낚시터' };
+  var LABEL = { jar: '로또', wash: '세탁기', ladder: '사다리', hunt: '사냥터', fish: '낚시터' };
   var BSETS = { 1: ['#f4ecd0', '#e8281f', '#e8281f', '#f58a1f'], 2: ['#f6b81c', '#f4f1e6', '#e8281f'] };
   function setBallSet(n) {
     var el = document.getElementById('ballset'); if (!el) return;
